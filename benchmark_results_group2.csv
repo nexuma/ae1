@@ -1,0 +1,2 @@
+Dataset,ThreeWayQuickSort,QuickSort,MedianOfThreeQuickSort,BottomUpMergeSort,HybridInsertionQuickSort,HybridInsertionMergeSort,MergeSort,InsertionSort,ShellSort,SelectionSort
+bad,6022479,1628971,1342824,3218877,2499112,2403266,2891593,25599361,2357993,53368040

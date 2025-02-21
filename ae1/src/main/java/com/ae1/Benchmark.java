@@ -32,11 +32,11 @@ public class Benchmark {
         // Define datasets for benchmarking (I hope the paths work on your machine)
         String[] datasetsGroup1 = {
             Paths.get("ae1", "src", "test", "resources", "testdata", "int10.txt").toString(),
-            Paths.get("ae1", "src", "test", "resources", "testdata", "int20k.txt").toString(),
             Paths.get("ae1", "src", "test", "resources", "testdata", "int50.txt").toString(),
             Paths.get("ae1", "src", "test", "resources", "testdata", "int100.txt").toString(),
-            Paths.get("ae1", "src", "test", "resources", "testdata", "int500k.txt").toString(),
             Paths.get("ae1", "src", "test", "resources", "testdata", "int1000.txt").toString(),
+            Paths.get("ae1", "src", "test", "resources", "testdata", "int20k.txt").toString(),
+            Paths.get("ae1", "src", "test", "resources", "testdata", "int500k.txt").toString(),
             Paths.get("ae1", "src", "test", "resources", "testdata", "intBig.txt").toString(),
         };
 
@@ -50,12 +50,12 @@ public class Benchmark {
 
         try {
             // Benchmark and write results for each group of datasets
-            benchmarkAndWriteResults(datasetsGroup1, "benchmark_results_group1.csv");
-            benchmarkAndWriteResults(datasetsGroup2, "benchmark_results_group2.csv");
-            benchmarkAndWriteResults(datasetsGroup3, "benchmark_results_group3.csv");
+            // benchmarkAndWriteResults(datasetsGroup1, "benchmark_results_group1.csv", Arrays.asList(datasetsGroup1));
+            benchmarkAndWriteResults(datasetsGroup2, "benchmark_results_group2.csv", Arrays.asList(datasetsGroup2));
+            benchmarkAndWriteResults(datasetsGroup3, "benchmark_results_group3.csv", Arrays.asList(datasetsGroup3));
         } catch (FileNotFoundException e) {
             logger.log(Level.SEVERE, "File not found during benchmarking", e);
-} finally {
+        } finally {
             // Ensure the program exits cleanly
             System.exit(0);
         }
@@ -66,9 +66,10 @@ public class Benchmark {
      *
      * @param datasets      Array of dataset file paths.
      * @param outputFileName Name of the output CSV file.
+     * @param datasetOrder  List of datasets in the desired order.
      * @throws FileNotFoundException if a dataset file is not found.
      */
-    private static void benchmarkAndWriteResults(String[] datasets, String outputFileName) throws FileNotFoundException {
+    private static void benchmarkAndWriteResults(String[] datasets, String outputFileName, List<String> datasetOrder) throws FileNotFoundException {
         List<Result> results = Collections.synchronizedList(new ArrayList<>());
 
         // Create a thread pool for concurrent execution
@@ -86,7 +87,7 @@ public class Benchmark {
 
             // Check if the file exists
             File file = path.toFile();
-            System.out.println("Checking file: " + file.getAbsolutePath()); // Debug statement
+            System.out.println("Checking file: " + file.getAbsolutePath());
             if (!file.exists()) {
                 logger.log(Level.SEVERE, "File not found: {0}", datasetName);
                 continue;
@@ -130,13 +131,18 @@ public class Benchmark {
                 .put(result.algorithmName, result.avgTime);
         }
 
-        // Sort datasets in the desired order
-        List<String> sortedDatasets = Arrays.asList("int10", "int50", "int100", "int1000", "int20k", "int500k", "intBig");
-
         // Write results to CSV
         try (PrintWriter writer = new PrintWriter(new FileWriter(outputFileName))) {
             writer.println("Dataset,ThreeWayQuickSort,QuickSort,MedianOfThreeQuickSort,BottomUpMergeSort,HybridInsertionQuickSort,HybridInsertionMergeSort,MergeSort,InsertionSort,ShellSort,SelectionSort");
-            for (String datasetName : sortedDatasets) {
+            for (String datasetPath : datasetOrder) {
+                // Extract the root name of the dataset
+                Path path = Paths.get(datasetPath);
+                String datasetName = path.getFileName().toString();
+                int extensionIndex = datasetName.lastIndexOf('.');
+                if (extensionIndex > 0) {
+                    datasetName = datasetName.substring(0, extensionIndex);
+                }
+
                 Map<String, Long> algorithmResults = groupedResults.get(datasetName);
                 writer.printf("%s", datasetName);
                 for (String algorithm : Arrays.asList("ThreeWayQuickSort", "QuickSort", "MedianOfThreeQuickSort", "BottomUpMergeSort", "HybridInsertionQuickSort", "HybridInsertionMergeSort", "MergeSort", "InsertionSort", "ShellSort", "SelectionSort")) {
