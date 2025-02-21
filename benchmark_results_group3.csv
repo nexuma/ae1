@@ -1,2 +1,0 @@
-Dataset,ThreeWayQuickSort,QuickSort,MedianOfThreeQuickSort,BottomUpMergeSort,HybridInsertionQuickSort,HybridInsertionMergeSort,MergeSort,InsertionSort,ShellSort,SelectionSort
-dutch.txt,10000000,10000000,10000000,10000000,10000000,10000000,10000000,36436938972,10000000,36437022853

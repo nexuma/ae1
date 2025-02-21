@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 
 public class Benchmark {
 
-    private static final long CUTOFF_TIME_NS = TimeUnit.MILLISECONDS.toNanos(10); 
+    private static final long CUTOFF_TIME_NS = TimeUnit.MILLISECONDS.toNanos(300000);
     private static final Logger logger = Logger.getLogger(Benchmark.class.getName());
 
     public static void main(String[] args) {
@@ -55,6 +55,9 @@ public class Benchmark {
             benchmarkAndWriteResults(datasetsGroup3, "benchmark_results_group3.csv");
         } catch (FileNotFoundException e) {
             logger.log(Level.SEVERE, "File not found during benchmarking", e);
+} finally {
+            // Ensure the program exits cleanly
+            System.exit(0);
         }
     }
 
@@ -85,7 +88,7 @@ public class Benchmark {
             File file = path.toFile();
             System.out.println("Checking file: " + file.getAbsolutePath()); // Debug statement
             if (!file.exists()) {
-                logger.log(Level.SEVERE, "File not found: " + datasetName);
+                logger.log(Level.SEVERE, "File not found: {0}", datasetName);
                 continue;
             }
 
@@ -137,7 +140,7 @@ public class Benchmark {
                 Map<String, Long> algorithmResults = groupedResults.get(datasetName);
                 writer.printf("%s", datasetName);
                 for (String algorithm : Arrays.asList("ThreeWayQuickSort", "QuickSort", "MedianOfThreeQuickSort", "BottomUpMergeSort", "HybridInsertionQuickSort", "HybridInsertionMergeSort", "MergeSort", "InsertionSort", "ShellSort", "SelectionSort")) {
-                    writer.printf(",%d", algorithmResults != null ? algorithmResults.getOrDefault(algorithm, 0L) : 0L);
+                    writer.printf(",%d", algorithmResults != null && algorithmResults.get(algorithm) != null ? algorithmResults.get(algorithm) : 0L);
                 }
                 writer.println();
             }
