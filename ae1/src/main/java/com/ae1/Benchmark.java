@@ -1,5 +1,6 @@
 package com.ae1;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,21 +31,21 @@ public class Benchmark {
     public static void main(String[] args) {
         // Define datasets for benchmarking (I hope the paths work on your machine)
         String[] datasetsGroup1 = {
-            Paths.get("src", "test", "resources", "testdata", "int10.txt").toString(),
-            Paths.get("src", "test", "resources", "testdata", "int20k.txt").toString(),
-            Paths.get("src", "test", "resources", "testdata", "int50.txt").toString(),
-            Paths.get("src", "test", "resources", "testdata", "int100.txt").toString(),
-            Paths.get("src", "test", "resources", "testdata", "int500k.txt").toString(),
-            Paths.get("src", "test", "resources", "testdata", "int1000.txt").toString(),
-            Paths.get("src", "test", "resources", "testdata", "intBig.txt").toString(),
+            Paths.get("ae1", "src", "test", "resources", "testdata", "int10.txt").toString(),
+            Paths.get("ae1", "src", "test", "resources", "testdata", "int20k.txt").toString(),
+            Paths.get("ae1", "src", "test", "resources", "testdata", "int50.txt").toString(),
+            Paths.get("ae1", "src", "test", "resources", "testdata", "int100.txt").toString(),
+            Paths.get("ae1", "src", "test", "resources", "testdata", "int500k.txt").toString(),
+            Paths.get("ae1", "src", "test", "resources", "testdata", "int1000.txt").toString(),
+            Paths.get("ae1", "src", "test", "resources", "testdata", "intBig.txt").toString(),
         };
 
         String[] datasetsGroup2 = {
-            Paths.get("src", "test", "resources", "testdata", "bad.txt").toString()
+            Paths.get("ae1", "src", "test", "resources", "testdata", "bad.txt").toString()
         };
 
         String[] datasetsGroup3 = {
-            Paths.get("src", "test", "resources", "testdata", "dutch.txt").toString()
+            Paths.get("ae1", "src", "test", "resources", "testdata", "dutch.txt").toString()
         };
 
         try {
@@ -57,7 +58,13 @@ public class Benchmark {
         }
     }
 
-    // This one is a bit messy, sorry
+    /**
+     * Benchmarks the sorting algorithms on the provided datasets and writes the results to a CSV file.
+     *
+     * @param datasets      Array of dataset file paths.
+     * @param outputFileName Name of the output CSV file.
+     * @throws FileNotFoundException if a dataset file is not found.
+     */
     private static void benchmarkAndWriteResults(String[] datasets, String outputFileName) throws FileNotFoundException {
         List<Result> results = Collections.synchronizedList(new ArrayList<>());
 
@@ -65,7 +72,7 @@ public class Benchmark {
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         for (String dataset : datasets) {
-            // Get the datasets
+            // Get the dataset path
             Path path = Paths.get(dataset);
             String datasetName = path.getFileName().toString();
             int extensionIndex = datasetName.lastIndexOf('.');
@@ -73,6 +80,15 @@ public class Benchmark {
                 datasetName = datasetName.substring(0, extensionIndex);
             }
             logger.log(Level.INFO, "Benchmarking dataset: {0}", datasetName);
+
+            // Check if the file exists
+            File file = path.toFile();
+            System.out.println("Checking file: " + file.getAbsolutePath()); // Debug statement
+            if (!file.exists()) {
+                logger.log(Level.SEVERE, "File not found: " + datasetName);
+                continue;
+            }
+
             int[] data;
             try {
                 // Read data from the dataset file
@@ -130,6 +146,16 @@ public class Benchmark {
         }
     }
 
+    /**
+     * Submits a benchmark task to the executor service.
+     *
+     * @param executor      The executor service.
+     * @param results       The list to store results.
+     * @param dataset       The name of the dataset.
+     * @param data          The data to be sorted.
+     * @param algorithmName The name of the sorting algorithm.
+     * @param algorithm     The sorting algorithm.
+     */
     private static void submitBenchmarkTask(ExecutorService executor, List<Result> results, String dataset, int[] data, String algorithmName, SortAlgorithm algorithm) {
         executor.submit(() -> {
             // Benchmark the sorting algorithm and add the result to the list
@@ -139,8 +165,15 @@ public class Benchmark {
         });
     }
 
+    /**
+     * Benchmarks the sorting algorithm by running it multiple times.
+     *
+     * @param data      The data to be sorted.
+     * @param algorithm The sorting algorithm.
+     * @return The average time taken to sort the data.
+     */
     private static long benchmarkSort(int[] data, SortAlgorithm algorithm) {
-        // Here as well, I sorted things this way so it would work in Latex
+       //  I sorted things this way so it would work in Latex
         long totalTime = 0;
         int runs = 0;
         ExecutorService executor = Executors.newSingleThreadExecutor();
